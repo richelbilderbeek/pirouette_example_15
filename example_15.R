@@ -47,15 +47,12 @@ ape::write.tree(phylogeny, file = "tree_true.fasta")
 alignment_params <- create_alignment_params(
   fasta_filename = "alignment_gen.fasta",
   root_sequence = create_blocked_dna(length = 1000),
-  mutation_rate = 0.01,
   rng_seed = rng_seed
 )
 
 experiment <- create_gen_experiment(
   beast2_options = beastier::create_beast2_options(
     input_filename = "input_gen.xml",
-    output_log_filename = "output_gen.log",
-    output_trees_filenames = "output_gen.trees",
     output_state_filename = "output_state.xml.state"
   )
 )
@@ -85,8 +82,6 @@ pir_params <- create_pir_params(
   )
 )
 
-# Make Peregrine friendly
-pir_params <- peregrine::to_pff_pir_params(pir_params)
 rm_pir_param_files(pir_params)
 
 errors <- pir_run(
