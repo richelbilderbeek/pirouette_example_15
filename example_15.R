@@ -74,9 +74,10 @@ pir_params <- create_pir_params(
   alignment_params = alignment_params,
   experiments = experiments,
   twinning_params = create_twinning_params(
-    twin_model = "copy_true",
     rng_seed_twin_tree = rng_seed,
+    sim_twin_tree_fun = create_copy_twin_tree_from_true_fun(),
     rng_seed_twin_alignment = rng_seed,
+    sim_twin_alignment_fun = get_sim_twin_alignment_with_std_site_model_fun(),
     twin_tree_filename = "tree_twin.newick",
     twin_alignment_filename = "alignment_twin.fasta"
   )
