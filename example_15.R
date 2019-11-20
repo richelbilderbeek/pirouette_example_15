@@ -5,8 +5,6 @@
 #
 #
 
-# Set the RNG seed
-rng_seed <- 314
 
 library(pirouette)
 suppressMessages(library(ggplot2))
@@ -14,6 +12,7 @@ library(beautier)
 
 root_folder <- getwd()
 example_no <- 15
+rng_seed <- 314
 example_folder <- file.path(root_folder, paste0("example_", example_no, "_", rng_seed))
 dir.create(example_folder, showWarnings = FALSE, recursive = TRUE)
 setwd(example_folder)
@@ -30,16 +29,21 @@ alignment_params <- create_alignment_params(
     mutation_rate = 0.1
   ),
   root_sequence = create_blocked_dna(length = 1000),
-  rng_seed = rng_seed
+  rng_seed = rng_seed,
+  fasta_filename = "true_alignment.fas"
 )
 
-experiment <- create_gen_experiment(
-  beast2_options = beastier::create_beast2_options(
-    input_filename = "input_gen.xml",
-    output_state_filename = "output_state.xml.state"
-  )
-)
-experiments <- list(experiment)
+# JC69, strict, Yule
+generative_experiment <- create_gen_experiment()
+generative_experiment$beast2_options$input_filename <- "true_alignment_gen.xml"
+generative_experiment$beast2_options$output_state_filename <- "true_alignment_gen.xml.state"
+generative_experiment$inference_model$mcmc$tracelog$filename <- "true_alignment_gen.log"
+generative_experiment$inference_model$mcmc$treelog$filename <- "true_alignment_gen.trees"
+generative_experiment$inference_model$mcmc$screenlog$filename <- "true_alignment_gen.csv"
+generative_experiment$errors_filename <- "true_errors_gen.csv"
+check_experiment(generative_experiment)
+
+experiments <- list(generative_experiment)
 
 # Set the RNG seed
 for (i in seq_along(experiments)) {
@@ -47,23 +51,30 @@ for (i in seq_along(experiments)) {
 }
 
 # Testing
-if (1 == 1) {
+if (1 == 2) {
   for (i in seq_along(experiments)) {
     experiments[[i]]$inference_model$mcmc <- create_mcmc(chain_length = 20000, store_every = 1000)
   }
 }
 
+
+twinning_params <- create_twinning_params(
+  rng_seed_twin_tree = rng_seed,
+  sim_twin_tree_fun = create_copy_twin_tree_from_true_fun(),
+  rng_seed_twin_alignment = rng_seed,
+  sim_twin_alignment_fun = get_sim_twin_alignment_with_same_n_mutation_fun(
+    mutation_rate = 0.1,
+    max_n_tries = 1000
+  ),
+  twin_tree_filename = "twin_tree.newick",
+  twin_alignment_filename = "twin_alignment.fasta",
+  twin_evidence_filename = "twin_evidence.csv"
+)
+
 pir_params <- create_pir_params(
   alignment_params = alignment_params,
   experiments = experiments,
-  twinning_params = create_twinning_params(
-    rng_seed_twin_tree = rng_seed,
-    sim_twin_tree_fun = create_copy_twin_tree_from_true_fun(),
-    rng_seed_twin_alignment = rng_seed,
-    sim_twin_alignment_fun = get_sim_twin_alignment_with_std_site_model_fun(),
-    twin_tree_filename = "tree_twin.newick",
-    twin_alignment_filename = "alignment_twin.fasta"
-  )
+  twinning_params = twinning_params
 )
 
 rm_pir_param_files(pir_params)
