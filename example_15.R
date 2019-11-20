@@ -24,7 +24,6 @@ phylogeny  <- ape::read.tree(
 ape::write.tree(phylogeny, file = "tree_true.fas")
 
 alignment_params <- create_alignment_params(
-  fasta_filename = "alignment_gen.fas",
   sim_true_alignment_fun = get_sim_true_alignment_with_std_site_model_fun(
     mutation_rate = 0.1
   ),
