@@ -3,7 +3,6 @@
 # - Uses copy_twin_tree as sim_twin_tree function
 #
 library(pirouette)
-suppressMessages(library(ggplot2))
 library(beautier)
 
 ################################################################################
@@ -41,6 +40,9 @@ pir_out <- pir_run(
   pir_params = pir_params
 )
 
+################################################################################
+# Save results
+################################################################################
 pir_save(
   phylogeny = phylogeny,
   pir_params = pir_params,
